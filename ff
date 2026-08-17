@@ -1,0 +1,114 @@
+(async () => {
+    const COUNT = 1000;
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function randomCode() {
+        let digits = "";
+
+        for (let i = 0; i < 17; i++) {
+            digits += Math.floor(Math.random() * 10);
+        }
+
+        return "AC8O" + digits;
+    }
+
+    const codes = Array.from(
+        { length: COUNT },
+        () => randomCode()
+    );
+
+    const input = document.querySelector("#code-input");
+    const button = document.querySelector("#check-btn");
+    const result = document.querySelector("#result");
+
+    if (!input || !button || !result) {
+        console.error(
+            "Không tìm thấy #code-input, #check-btn hoặc #result"
+        );
+        return;
+    }
+
+    function waitForResult(oldText) {
+        return new Promise(resolve => {
+            const start = Date.now();
+
+            const timer = setInterval(() => {
+                const text = result.innerText.trim();
+
+                if (text && text !== oldText) {
+                    clearInterval(timer);
+                    resolve(text);
+                    return;
+                }
+
+                if (Date.now() - start >= 15000) {
+                    clearInterval(timer);
+                    resolve(text || "TIMEOUT");
+                }
+            }, 100);
+        });
+    }
+
+    for (let i = 0; i < codes.length; i++) {
+
+        const code = codes[i];
+
+        console.log(
+            `🔄 [${i + 1}/${codes.length}] ${code}`
+        );
+
+        const oldText = result.innerText.trim();
+
+        // Nhập code
+        input.value = code;
+
+        input.dispatchEvent(
+            new Event("input", { bubbles: true })
+        );
+
+        input.dispatchEvent(
+            new Event("change", { bubbles: true })
+        );
+
+        // Kiểm tra
+        button.click();
+
+        // Chờ kết quả
+        const text = await waitForResult(oldText);
+
+        console.log(
+            `📋 ${code} → ${text}`
+        );
+
+        const pending =
+            text.includes("Chờ duyệt") ||
+            text.includes("đang chờ được duyệt") ||
+            result.querySelector(".status-2") ||
+            result.querySelector(".note-pending");
+
+        if (pending) {
+
+            console.log(
+                "⏸ Chờ duyệt → 5 giây"
+            );
+
+            await sleep(500);
+
+        } else {
+
+            console.log(
+                "⏱ Chờ 200ms"
+            );
+
+            await sleep(200);
+        }
+    }
+
+    console.log(
+        "✅ Hoàn tất 1.000 code demo."
+    );
+
+})();
